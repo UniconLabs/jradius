@@ -52,7 +52,6 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -60,7 +59,7 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.sec.ECPrivateKey;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
@@ -595,17 +594,18 @@ public class EAPTLSAuthenticator extends EAPAuthenticator
         AlgorithmIdentifier     algId = keyInfo.getPrivateKeyAlgorithm();
         if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption))
         {
-            RSAPrivateKeyStructure  keyStructure = new RSAPrivateKeyStructure((ASN1Sequence)keyInfo.getPrivateKey());
+            RSAPrivateKey privateKey = RSAPrivateKey.getInstance(keyInfo.parsePrivateKey());
 
             return new RSAPrivateCrtKeyParameters(
-                                        keyStructure.getModulus(),
-                                        keyStructure.getPublicExponent(),
-                                        keyStructure.getPrivateExponent(),
-                                        keyStructure.getPrime1(),
-                                        keyStructure.getPrime2(),
-                                        keyStructure.getExponent1(),
-                                        keyStructure.getExponent2(),
-                                        keyStructure.getCoefficient());
+                    privateKey.getModulus(),
+                    privateKey.getPublicExponent(),
+                    privateKey.getPrivateExponent(),
+                    privateKey.getPrime1(),
+                    privateKey.getPrime2(),
+                    privateKey.getExponent1(),
+                    privateKey.getExponent2(),
+                    privateKey.getCoefficient()
+            );
         }
         else if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {

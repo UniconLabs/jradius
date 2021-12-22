@@ -35,8 +35,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.openssl.PEMParser;
 
 public class KeyStoreUtil 
 {
@@ -136,14 +139,15 @@ public class KeyStoreUtil
 	{
 		loadBC();
 
-        PemReader pemReader = new PemReader(new InputStreamReader(in));
-
+		PEMParser pemParser = new PEMParser(new InputStreamReader(in));
 		Object obj;
-		while ((obj = pemReader.readPemObject()) != null)
+		while ((obj = pemParser.readObject()) != null)
 		{
 			if (obj instanceof X509Certificate)
 			{
 				return (X509Certificate) obj;
+			} else if (obj instanceof X509CertificateHolder) {
+				return new JcaX509CertificateConverter().getCertificate((X509CertificateHolder) obj);
 			}
 		}
 		
